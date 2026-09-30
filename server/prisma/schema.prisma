@@ -1,0 +1,121 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recipients   Recipient[]
+  quizSessions QuizSession[]
+  savedGifts   SavedGift[]
+
+  @@map("users")
+}
+
+model Recipient {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  relationship      String // e.g. "Friend", "Partner", "Mother", "Father", "Colleague", "Sibling", "Child"
+  age               Int?
+  gender            String?
+  interests         String[] // e.g. ["Reading", "Coffee", "Gaming", "Cooking"]
+  personalityTraits String[] // e.g. ["Introvert", "Minimalist", "Adventurous", "Tech-savvy"]
+  dislikes          String?
+  budgetMin         Float?
+  budgetMax         Float?
+  notes             String?
+
+  occasions  Occasion[]
+  savedGifts SavedGift[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("recipients")
+}
+
+model Occasion {
+  id          String    @id @default(cuid())
+  recipientId String
+  recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  title       String // e.g. "30th Birthday", "Christmas 2026", "Anniversary"
+  type        String // e.g. "BIRTHDAY", "ANNIVERSARY", "HOLIDAY", "GRADUATION", "HOUSEWARMING", "OTHER"
+  date        DateTime
+  budget      Float?
+  isCompleted Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("occasions")
+}
+
+model GiftIdea {
+  id             String   @id @default(cuid())
+  title          String
+  description    String
+  estimatedPrice Float
+  currency       String   @default("USD")
+  category       String // e.g. "Tech & Gadgets", "Home & Living", "Books & Experiences", "Food & Drink", "Fashion"
+  tags           String[] // e.g. ["gadgets", "audio", "coffee-lovers", "cozy"]
+  affiliateUrl   String?
+  imageUrl       String?
+  detectiveClue  String? // The "detective's deduction" why this gift matches
+  vibe           String? // e.g. "Thoughtful", "Practical", "Luxury", "Fun", "Sentimental"
+  isCurated      Boolean  @default(true)
+
+  savedBy SavedGift[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gift_ideas")
+}
+
+model SavedGift {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientId String?
+  recipient   Recipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  giftIdeaId  String
+  giftIdea    GiftIdea   @relation(fields: [giftIdeaId], references: [id], onDelete: Cascade)
+  status      String     @default("CONSIDERING") // "CONSIDERING", "PURCHASED", "ARCHIVED"
+  customNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, recipientId, giftIdeaId])
+  @@map("saved_gifts")
+}
+
+model QuizSession {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recipientName   String?
+  relationship    String?
+  occasion        String?
+  budgetMin       Float?
+  budgetMax       Float?
+  interests       String[]
+  personality     String[]
+  answers         Json? // Full questionnaire answers
+  recommendations Json? // Generated suggestions
+
+  createdAt DateTime @default(now())
+
+  @@map("quiz_sessions")
+}
