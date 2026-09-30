@@ -61,31 +61,43 @@ export const saveGift = async (req: Request, res: Response, next: NextFunction) 
       }
     }
 
-    // Upsert or create saved gift
-    const saved = await prisma.savedGift.upsert({
+    // Check for existing saved gift for this user and giftIdea (and recipient)
+    const existing = await prisma.savedGift.findFirst({
       where: {
-        userId_recipientId_giftIdeaId: {
-          userId: req.user!.id,
-          recipientId: validated.recipientId || (null as any),
-          giftIdeaId: validated.giftIdeaId,
-        },
-      },
-      update: {
-        status: validated.status,
-        customNotes: validated.customNotes,
-      },
-      create: {
         userId: req.user!.id,
-        recipientId: validated.recipientId || null,
         giftIdeaId: validated.giftIdeaId,
-        status: validated.status,
-        customNotes: validated.customNotes,
-      },
-      include: {
-        giftIdea: true,
-        recipient: true,
+        recipientId: validated.recipientId || null,
       },
     });
+
+    let saved;
+    if (existing) {
+      saved = await prisma.savedGift.update({
+        where: { id: existing.id },
+        data: {
+          status: validated.status || existing.status,
+          customNotes: validated.customNotes !== undefined ? validated.customNotes : existing.customNotes,
+        },
+        include: {
+          giftIdea: true,
+          recipient: true,
+        },
+      });
+    } else {
+      saved = await prisma.savedGift.create({
+        data: {
+          userId: req.user!.id,
+          recipientId: validated.recipientId || null,
+          giftIdeaId: validated.giftIdeaId,
+          status: validated.status || "CONSIDERING",
+          customNotes: validated.customNotes,
+        },
+        include: {
+          giftIdea: true,
+          recipient: true,
+        },
+      });
+    }
 
     return res.status(201).json({
       success: true,

@@ -11,10 +11,10 @@ import { AuthModal } from "./components/AuthModal";
 import {
   apiGetMe,
   apiAnalyzeQuiz,
-  getSavedGiftsLocal,
-  saveGiftLocal,
-  removeSavedGiftLocal,
-  updateSavedGiftStatusLocal,
+  apiGetSavedGifts,
+  apiSaveGift,
+  apiRemoveSavedGift,
+  apiUpdateSavedGiftStatus,
   removeToken,
 } from "./services/api";
 import type { User, SavedGiftItem } from "./services/api";
@@ -65,11 +65,15 @@ export function App() {
   useEffect(() => {
     // Check saved token / current user
     apiGetMe().then((u) => {
-      if (u) setUser(u);
+      if (u) {
+        setUser(u);
+      }
     });
 
-    // Load local saved casebook
-    setSavedGifts(getSavedGiftsLocal());
+    // Load saved casebook (from API if logged in, else local)
+    apiGetSavedGifts().then((items) => {
+      setSavedGifts(items);
+    });
   }, []);
 
   const showToast = (msg: string) => {
@@ -184,7 +188,7 @@ export function App() {
   };
 
   // Save Gift handler
-  const handleSaveGift = (recommendation: ScoredRecommendation) => {
+  const handleSaveGift = async (recommendation: ScoredRecommendation) => {
     const item: SavedGiftItem = {
       id: `saved-${recommendation.gift.id}-${Date.now()}`,
       giftIdea: {
@@ -196,27 +200,29 @@ export function App() {
         category: recommendation.gift.category,
         imageUrl: recommendation.gift.imageUrl,
         vibe: recommendation.gift.vibe,
+        tags: recommendation.gift.tags,
+        detectiveClue: recommendation.gift.detectiveClue,
       },
       recipientName: `${recipient.relationship} ${recipient.name ? `(${recipient.name})` : ""}`,
       status: "CONSIDERING",
       savedAt: new Date().toISOString(),
     };
 
-    const updated = saveGiftLocal(item);
+    const updated = await apiSaveGift(item);
     setSavedGifts(updated);
     showToast(`🔖 Saved "${recommendation.gift.title}" to Casebook!`);
   };
 
   // Update Status handler
-  const handleUpdateStatus = (id: string, status: "CONSIDERING" | "PURCHASED" | "ARCHIVED") => {
-    const updated = updateSavedGiftStatusLocal(id, status);
+  const handleUpdateStatus = async (id: string, status: "CONSIDERING" | "PURCHASED" | "ARCHIVED") => {
+    const updated = await apiUpdateSavedGiftStatus(id, status);
     setSavedGifts(updated);
     showToast(`Status updated to ${status}`);
   };
 
   // Remove handler
-  const handleRemoveSavedGift = (id: string) => {
-    const updated = removeSavedGiftLocal(id);
+  const handleRemoveSavedGift = async (id: string) => {
+    const updated = await apiRemoveSavedGift(id);
     setSavedGifts(updated);
     showToast("Removed from Casebook");
   };
@@ -322,9 +328,11 @@ export function App() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        onSuccess={(u) => {
+        onSuccess={async (u) => {
           setUser(u);
-          showToast(`Welcome, Agent ${u.name}!`);
+          const cloudGifts = await apiGetSavedGifts();
+          setSavedGifts(cloudGifts);
+          showToast(`Welcome, Agent ${u.name}! Casebook synced.`);
         }}
       />
     </div>

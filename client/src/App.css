@@ -1938,8 +1938,20 @@
 }
 
 /* ========================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN (375px, 390px, 768px, 1024px, 1440px)
    ======================================================== */
+@media (max-width: 1024px) {
+  .app-shell {
+    max-width: 960px;
+    padding: 16px 20px 48px;
+  }
+
+  .catalog-grid,
+  .matches-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .app-shell {
     padding: 12px 14px 36px;
@@ -1947,24 +1959,46 @@
   }
 
   .header-content {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .brand-logo {
-    margin-bottom: 4px;
+    justify-content: center;
+  }
+
+  .header-nav {
+    justify-content: center;
+    overflow-x: auto;
+    padding: 3px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .header-auth-actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 
   .hero-headline {
-    font-size: 32px;
+    font-size: 30px;
+    line-height: 1.2;
   }
 
   .hero-banner {
-    padding: 32px 18px;
+    padding: 28px 16px;
   }
 
   .stepper-card {
-    padding: 24px 18px;
+    padding: 20px 16px;
   }
 
   .steps-indicators {
@@ -1979,11 +2013,122 @@
     grid-template-columns: 1fr;
   }
 
-  .matches-grid {
+  .matches-grid,
+  .catalog-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .recommendation-score-pill {
+    align-self: flex-start;
   }
 
   .footer-meta {
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 375px and 390px Mobile Screens */
+  .app-shell {
+    padding: 10px 10px 32px;
+    gap: 16px;
+  }
+
+  .header-container {
+    top: 8px;
+    padding: 8px 12px;
+  }
+
+  .logo-title {
+    font-size: 18px;
+  }
+
+  .logo-icon {
+    font-size: 24px;
+  }
+
+  .nav-btn {
+    padding: 5px 9px;
+    font-size: 11.5px;
+    gap: 4px;
+  }
+
+  .hero-headline {
+    font-size: 25px;
+  }
+
+  .hero-subtext {
+    font-size: 14px;
+  }
+
+  .stepper-card {
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .step-heading {
+    font-size: 18px;
+  }
+
+  .step-subtitle {
+    font-size: 13px;
+  }
+
+  .chip-options-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
+  }
+
+  .chip-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .stepper-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .stepper-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .catalog-controls {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .price-slider-wrap {
+    width: 100%;
+  }
+
+  .auth-modal {
+    width: 94vw;
+    max-width: 94vw;
+    padding: 20px 16px;
+  }
+
+  .casebook-title-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .btn-primary-glow {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .results-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 }

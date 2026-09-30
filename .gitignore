@@ -34,3 +34,7 @@ Thumbs.db
 # Vite & build caches
 .vite/
 client/.vite/
+
+# Local PostgreSQL Data
+.pgdata/
+server/.pgdata/

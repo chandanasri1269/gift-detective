@@ -9,6 +9,7 @@ router.use(requireAuth);
 router.get("/", savedGiftController.getSavedGifts);
 router.post("/", savedGiftController.saveGift);
 router.put("/:id", savedGiftController.updateSavedGift);
+router.patch("/:id", savedGiftController.updateSavedGift);
 router.delete("/:id", savedGiftController.deleteSavedGift);
 
 export default router;

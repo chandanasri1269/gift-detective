@@ -1,19 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { INITIAL_GIFTS } from "../data/seedGifts";
 import type { GiftItem } from "../data/seedGifts";
+import { apiGetGifts } from "../services/api";
 
 interface CatalogProps {
   onQuickInspect: (gift: GiftItem) => void;
 }
 
 export const GiftCatalog: React.FC<CatalogProps> = ({ onQuickInspect }) => {
+  const [giftsList, setGiftsList] = useState<GiftItem[]>(INITIAL_GIFTS);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [maxPrice, setMaxPrice] = useState<number>(10000);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const categories = ["all", ...Array.from(new Set(INITIAL_GIFTS.map((g) => g.category)))];
+  useEffect(() => {
+    setIsLoading(true);
+    apiGetGifts()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setGiftsList(data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
-  const filtered = INITIAL_GIFTS.filter((gift) => {
+  const categories = ["all", ...Array.from(new Set(giftsList.map((g) => g.category)))];
+
+  const filtered = giftsList.filter((gift) => {
     const matchesCat = selectedCategory === "all" || gift.category === selectedCategory;
     const matchesPrice = gift.estimatedPrice <= maxPrice;
     const query = search.toLowerCase().trim();
@@ -22,7 +37,7 @@ export const GiftCatalog: React.FC<CatalogProps> = ({ onQuickInspect }) => {
       gift.title.toLowerCase().includes(query) ||
       gift.description.toLowerCase().includes(query) ||
       gift.tags.some((t) => t.toLowerCase().includes(query)) ||
-      gift.detectiveClue.toLowerCase().includes(query);
+      (gift.detectiveClue && gift.detectiveClue.toLowerCase().includes(query));
 
     return matchesCat && matchesPrice && matchesSearch;
   });
@@ -89,6 +104,13 @@ export const GiftCatalog: React.FC<CatalogProps> = ({ onQuickInspect }) => {
           />
         </div>
       </div>
+
+      {/* Loading state indicator */}
+      {isLoading && (
+        <div style={{ textAlign: "center", padding: "1rem", color: "var(--accent-gold)" }}>
+          <span>🔍 Synchronizing detective evidence archive...</span>
+        </div>
+      )}
 
       {/* Grid */}
       <div className="catalog-grid">
