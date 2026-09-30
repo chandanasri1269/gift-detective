@@ -7,12 +7,12 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   recipients   Recipient[]
   quizSessions QuizSession[]
@@ -22,63 +22,65 @@ model User {
 }
 
 model Recipient {
-  id                String   @id @default(cuid())
+  id                String       @id @default(cuid())
   userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   name              String
-  relationship      String // e.g. "Friend", "Partner", "Mother", "Father", "Colleague", "Sibling", "Child"
+  relationship      String       // e.g. "Friend", "Partner", "Mother", "Father", "Colleague", "Sibling", "Child"
   age               Int?
   gender            String?
-  interests         String[] // e.g. ["Reading", "Coffee", "Gaming", "Cooking"]
-  personalityTraits String[] // e.g. ["Introvert", "Minimalist", "Adventurous", "Tech-savvy"]
+  interests         String[]     // e.g. ["Reading", "Coffee", "Gaming", "Cooking"]
+  personalityTraits String[]     // e.g. ["Introvert", "Minimalist", "Adventurous", "Tech-savvy"]
+  favoriteColors    String[]     @default([])
+  likes             String[]     @default([])
   dislikes          String?
   budgetMin         Float?
   budgetMax         Float?
   notes             String?
 
-  occasions  Occasion[]
-  savedGifts SavedGift[]
+  occasions         Occasion[]
+  savedGifts        SavedGift[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@map("recipients")
 }
 
 model Occasion {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   recipientId String
-  recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
-  title       String // e.g. "30th Birthday", "Christmas 2026", "Anniversary"
-  type        String // e.g. "BIRTHDAY", "ANNIVERSARY", "HOLIDAY", "GRADUATION", "HOUSEWARMING", "OTHER"
+  recipient   Recipient  @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  title       String     // e.g. "30th Birthday", "Christmas 2026", "Anniversary"
+  type        String     // e.g. "BIRTHDAY", "ANNIVERSARY", "HOLIDAY", "GRADUATION", "HOUSEWARMING", "OTHER"
   date        DateTime
   budget      Float?
-  isCompleted Boolean   @default(false)
+  isCompleted Boolean    @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("occasions")
 }
 
 model GiftIdea {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   title          String
   description    String
   estimatedPrice Float
-  currency       String   @default("USD")
-  category       String // e.g. "Tech & Gadgets", "Home & Living", "Books & Experiences", "Food & Drink", "Fashion"
-  tags           String[] // e.g. ["gadgets", "audio", "coffee-lovers", "cozy"]
+  currency       String       @default("INR")
+  category       String       // e.g. "Tech & Gadgets", "Home & Living", "Books & Experiences", "Food & Drink", "Fashion"
+  tags           String[]     // e.g. ["gadgets", "audio", "coffee-lovers", "cozy"]
   affiliateUrl   String?
   imageUrl       String?
-  detectiveClue  String? // The "detective's deduction" why this gift matches
-  vibe           String? // e.g. "Thoughtful", "Practical", "Luxury", "Fun", "Sentimental"
-  isCurated      Boolean  @default(true)
+  detectiveClue  String?      // The "detective's deduction" why this gift matches
+  vibe           String?      // e.g. "Thoughtful", "Practical", "Luxury", "Fun", "Sentimental", "Cute"
+  isCurated      Boolean      @default(true)
 
-  savedBy SavedGift[]
+  savedBy        SavedGift[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@map("gift_ideas")
 }
@@ -94,17 +96,17 @@ model SavedGift {
   status      String     @default("CONSIDERING") // "CONSIDERING", "PURCHASED", "ARCHIVED"
   customNotes String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@unique([userId, recipientId, giftIdeaId])
   @@map("saved_gifts")
 }
 
 model QuizSession {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String?
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   recipientName   String?
   relationship    String?
   occasion        String?
@@ -112,10 +114,13 @@ model QuizSession {
   budgetMax       Float?
   interests       String[]
   personality     String[]
-  answers         Json? // Full questionnaire answers
-  recommendations Json? // Generated suggestions
+  favoriteColors  String[]  @default([])
+  likes           String[]  @default([])
+  dislikes        String[]  @default([])
+  answers         Json?     // Full questionnaire answers
+  recommendations Json?     // Generated suggestions
 
-  createdAt DateTime @default(now())
+  createdAt       DateTime  @default(now())
 
   @@map("quiz_sessions")
 }
