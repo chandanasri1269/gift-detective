@@ -15,9 +15,11 @@ import {
   apiSaveGift,
   apiRemoveSavedGift,
   apiUpdateSavedGiftStatus,
+  apiGetRecipients,
+  apiCreateRecipient,
   removeToken,
 } from "./services/api";
-import type { User, SavedGiftItem } from "./services/api";
+import type { User, SavedGiftItem, RecipientRecord } from "./services/api";
 
 import type {
   RecipientProfile,
@@ -34,6 +36,7 @@ export function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [savedGifts, setSavedGifts] = useState<SavedGiftItem[]>([]);
+  const [recipientsList, setRecipientsList] = useState<RecipientRecord[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Investigation state
@@ -67,6 +70,7 @@ export function App() {
     apiGetMe().then((u) => {
       if (u) {
         setUser(u);
+        apiGetRecipients().then((recs) => setRecipientsList(recs));
       }
     });
 
@@ -91,6 +95,25 @@ export function App() {
     setOccasion(occDetails);
     setBudget(budgCriteria);
     setIsAnalyzing(true);
+
+    // If logged in, persist recipient to database
+    if (user && recProfile.name) {
+      apiCreateRecipient({
+        name: recProfile.name,
+        relationship: recProfile.relationship || "Other",
+        age: recProfile.age,
+        gender: recProfile.gender,
+        interests: recProfile.interests || [],
+        personalityTraits: recProfile.personalityTraits || [],
+        favoriteColors: recProfile.favoriteColors || [],
+        likes: recProfile.likes || [],
+        dislikes: Array.isArray(recProfile.dislikes) ? recProfile.dislikes.join(", ") : recProfile.dislikes || undefined,
+        budgetMin: budgCriteria.min,
+        budgetMax: budgCriteria.max,
+      }).then(() => {
+        apiGetRecipients().then((recs) => setRecipientsList(recs));
+      }).catch(() => {});
+    }
 
     try {
       // Simulate radar scan interval for dramatic detective effect
@@ -231,6 +254,7 @@ export function App() {
   const handleLogout = () => {
     removeToken();
     setUser(null);
+    setRecipientsList([]);
     showToast("Signed out successfully");
   };
 
@@ -276,6 +300,7 @@ export function App() {
                     initialRecipient={recipient}
                     initialOccasion={occasion}
                     initialBudget={budget}
+                    savedRecipients={recipientsList}
                     onAnalyze={handleAnalyze}
                   />
                 </div>
@@ -330,9 +355,13 @@ export function App() {
         onClose={() => setAuthModalOpen(false)}
         onSuccess={async (u) => {
           setUser(u);
-          const cloudGifts = await apiGetSavedGifts();
+          const [cloudGifts, cloudRecs] = await Promise.all([
+            apiGetSavedGifts(),
+            apiGetRecipients(),
+          ]);
           setSavedGifts(cloudGifts);
-          showToast(`Welcome, Agent ${u.name}! Casebook synced.`);
+          setRecipientsList(cloudRecs);
+          showToast(`Welcome, Agent ${u.name}! Casebook and dossiers synced.`);
         }}
       />
     </div>

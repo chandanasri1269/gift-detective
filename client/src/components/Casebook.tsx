@@ -21,14 +21,19 @@ export const Casebook: React.FC<CasebookProps> = ({
     return item.status === filterStatus;
   });
 
-  // Calculate financials
+  // Calculate financials (Planned, Spent, Remaining)
   const totalConsidering = savedGifts
     .filter((s) => s.status === "CONSIDERING")
     .reduce((sum, s) => sum + s.giftIdea.estimatedPrice, 0);
 
-  const totalPurchased = savedGifts
+  const totalSpent = savedGifts
     .filter((s) => s.status === "PURCHASED")
     .reduce((sum, s) => sum + s.giftIdea.estimatedPrice, 0);
+
+  // Planned budget is the total value of items considering + purchased (or minimum 5000 if empty)
+  const [allocatedBudget, setAllocatedBudget] = useState<number | null>(null);
+  const totalPlanned = allocatedBudget !== null ? allocatedBudget : Math.max(totalConsidering + totalSpent, 3000);
+  const totalRemaining = Math.max(0, totalPlanned - totalSpent);
 
   return (
     <div className="casebook-container animate-fade-in">
@@ -38,6 +43,9 @@ export const Casebook: React.FC<CasebookProps> = ({
           <div>
             <span className="case-status-badge">DETECTIVE DOSSIER</span>
             <h1 className="casebook-title">Your Casebook of Saved Gifts</h1>
+            <p className="casebook-subtitle" style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
+              Track your investigative shortlist, budget allocation, and purchased items.
+            </p>
           </div>
 
           <button
@@ -49,21 +57,57 @@ export const Casebook: React.FC<CasebookProps> = ({
           </button>
         </div>
 
-        {/* Budget Tracker Cards */}
-        <div className="financials-grid">
+        {/* Budget Tracker Cards: Planned, Spent, Remaining */}
+        <div className="financials-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", marginTop: "20px" }}>
           <div className="stat-card">
-            <span className="stat-label">Total Gifts Saved</span>
-            <span className="stat-val">{savedGifts.length}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="stat-label">Planned Budget</span>
+              <button
+                type="button"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--accent-gold)",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                  padding: "0 4px",
+                }}
+                onClick={() => {
+                  const val = window.prompt("Enter your target planned budget in ₹:", String(totalPlanned));
+                  if (val && !isNaN(Number(val))) {
+                    setAllocatedBudget(Math.max(500, Number(val)));
+                  }
+                }}
+              >
+                Edit ✏️
+              </button>
+            </div>
+            <span className="stat-val text-gold">₹{totalPlanned.toLocaleString("en-IN")}</span>
+            <small style={{ color: "var(--text-muted)", fontSize: "11px" }}>Total allocated funds</small>
           </div>
 
           <div className="stat-card">
-            <span className="stat-label">Pending / Considering</span>
-            <span className="stat-val text-gold">₹{totalConsidering.toLocaleString("en-IN")}</span>
+            <span className="stat-label">Spent</span>
+            <span className="stat-val text-emerald">₹{totalSpent.toLocaleString("en-IN")}</span>
+            <small style={{ color: "var(--text-muted)", fontSize: "11px" }}>
+              {savedGifts.filter((s) => s.status === "PURCHASED").length} gift(s) purchased
+            </small>
           </div>
 
           <div className="stat-card">
-            <span className="stat-label">Acquired / Purchased</span>
-            <span className="stat-val text-emerald">₹{totalPurchased.toLocaleString("en-IN")}</span>
+            <span className="stat-label">Remaining</span>
+            <span className={`stat-val ${totalRemaining > 0 ? "text-emerald" : "text-gold"}`}>
+              ₹{totalRemaining.toLocaleString("en-IN")}
+            </span>
+            <small style={{ color: "var(--text-muted)", fontSize: "11px" }}>Balance available</small>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-label">Considering Leads</span>
+            <span className="stat-val">{savedGifts.filter((s) => s.status === "CONSIDERING").length}</span>
+            <small style={{ color: "var(--text-muted)", fontSize: "11px" }}>
+              ₹{totalConsidering.toLocaleString("en-IN")} potential
+            </small>
           </div>
         </div>
       </div>

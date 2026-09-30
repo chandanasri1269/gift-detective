@@ -1,10 +1,12 @@
 import { useState } from "react";
 import type { RecipientProfile, OccasionDetails, BudgetCriteria } from "../services/giftDetectiveClient";
+import type { RecipientRecord } from "../services/api";
 
 interface StepperProps {
   initialRecipient: RecipientProfile;
   initialOccasion: OccasionDetails;
   initialBudget: BudgetCriteria;
+  savedRecipients?: RecipientRecord[];
   onAnalyze: (recipient: RecipientProfile, occasion: OccasionDetails, budget: BudgetCriteria) => void;
 }
 
@@ -12,6 +14,7 @@ export const QuestionnaireStepper: React.FC<StepperProps> = ({
   initialRecipient,
   initialOccasion,
   initialBudget,
+  savedRecipients,
   onAnalyze,
 }) => {
   const [step, setStep] = useState<number>(1);
@@ -182,6 +185,39 @@ export const QuestionnaireStepper: React.FC<StepperProps> = ({
             <p className="step-desc">
               Every investigation starts with identifying the subject.
             </p>
+
+            {savedRecipients && savedRecipients.length > 0 && (
+              <div className="saved-recipients-selector glass-panel" style={{ padding: "12px 14px", marginBottom: "16px", borderRadius: "var(--radius-md)" }}>
+                <span style={{ fontSize: "11px", color: "var(--accent-gold)", fontWeight: 700, letterSpacing: "1px" }}>
+                  📂 LOAD SAVED DOSSIER:
+                </span>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
+                  {savedRecipients.map((rec) => (
+                    <button
+                      key={rec.id}
+                      type="button"
+                      className="filter-pill"
+                      style={{ fontSize: "12px", padding: "4px 10px" }}
+                      onClick={() => {
+                        setName(rec.name);
+                        setRelationship(rec.relationship);
+                        if (rec.age) setAge(String(rec.age));
+                        if (rec.gender) setGender(rec.gender);
+                        if (rec.interests && rec.interests.length > 0) setInterests(rec.interests);
+                        if (rec.personalityTraits && rec.personalityTraits.length > 0) setPersonalityTraits(rec.personalityTraits);
+                        if (rec.favoriteColors && rec.favoriteColors.length > 0) setFavoriteColors(rec.favoriteColors);
+                        if (rec.likes && rec.likes.length > 0) setLikes(rec.likes);
+                        if (rec.dislikes) setDislikes(rec.dislikes);
+                        if (rec.budgetMin) setBudgetMin(String(rec.budgetMin));
+                        if (rec.budgetMax) setBudgetMax(String(rec.budgetMax));
+                      }}
+                    >
+                      {rec.name} ({rec.relationship})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="form-group">
               <label>Recipient's Name (or Nickname)</label>

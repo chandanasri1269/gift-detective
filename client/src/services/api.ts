@@ -104,6 +104,64 @@ export const apiGetMe = async (): Promise<User | null> => {
   }
 };
 
+// Recipients API
+export interface RecipientRecord {
+  id: string;
+  name: string;
+  relationship: string;
+  age?: number | null;
+  gender?: string | null;
+  interests: string[];
+  personalityTraits: string[];
+  favoriteColors: string[];
+  likes: string[];
+  dislikes?: string | null;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  notes?: string | null;
+}
+
+export const apiGetRecipients = async (): Promise<RecipientRecord[]> => {
+  const token = getToken();
+  if (!token) return [];
+
+  try {
+    const res = await fetch(`${API_BASE}/recipients`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.recipients || [];
+    }
+  } catch {
+    // fallback
+  }
+  return [];
+};
+
+export const apiCreateRecipient = async (data: Partial<RecipientRecord>): Promise<RecipientRecord | null> => {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${API_BASE}/recipients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.recipient;
+    }
+  } catch {
+    // fallback
+  }
+  return null;
+};
+
 // Gift Catalog API
 export const apiGetGifts = async (params?: {
   category?: string;
