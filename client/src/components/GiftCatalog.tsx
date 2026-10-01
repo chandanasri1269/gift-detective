@@ -12,10 +12,9 @@ export const GiftCatalog: React.FC<CatalogProps> = ({ onQuickInspect }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [maxPrice, setMaxPrice] = useState<number>(10000);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
     apiGetGifts()
       .then((data) => {
         if (data && data.length > 0) {

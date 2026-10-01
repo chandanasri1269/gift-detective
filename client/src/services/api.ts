@@ -1,7 +1,9 @@
 import { runLocalDetective } from "./giftDetectiveClient";
 import type { RecipientProfile, OccasionDetails, BudgetCriteria, ScoredRecommendation } from "./giftDetectiveClient";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (
+  import.meta.env.VITE_API_BASE_URL || "/api"
+).replace(/\/$/, "");
 
 export interface User {
   id: string;
@@ -43,7 +45,7 @@ export const apiRegister = async (data: { name: string; email: string; password:
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-  } catch (netErr: any) {
+  } catch {
     // True network outage fallback only
     const mockUser = { id: "local-user-1", name: data.name, email: data.email };
     const mockToken = "mock-jwt-token";
@@ -68,7 +70,7 @@ export const apiLogin = async (data: { email: string; password: string }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-  } catch (netErr: any) {
+  } catch {
     // True network outage fallback only
     const mockUser = { id: "local-user-1", name: data.email.split("@")[0], email: data.email };
     const mockToken = "mock-jwt-token";
