@@ -1,11 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
-    "client": {
+    "web": {
       "root": "client",
       "framework": "vite"
     },
-    "server": {
+    "api": {
       "root": "server",
       "framework": "express"
     }
@@ -14,13 +14,13 @@
     {
       "source": "/api/(.*)",
       "destination": {
-        "service": "server"
+        "service": "api"
       }
     },
     {
       "source": "/(.*)",
       "destination": {
-        "service": "client"
+        "service": "web"
       }
     }
   ]

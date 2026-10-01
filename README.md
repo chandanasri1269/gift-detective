@@ -94,8 +94,8 @@ Both the Vite frontend and Express API run as a single web service:
 #### Option 3: Vercel Multi-Service Deployment (Single Vercel Project)
 Deploy both the React/Vite frontend and Express backend together under a single Vercel project with shared routing:
 1. Root `vercel.json` configures both services:
-   - `client`: Vite frontend serving `/(.*)`
-   - `server`: Express backend routing `/api/(.*)`
+   - `web`: Vite frontend serving `/(.*)`
+   - `api`: Express backend routing `/api/(.*)`
 2. Set Environment Variables in Vercel Project Settings:
    - `DATABASE_URL`: Hosted PostgreSQL connection string (Neon, Supabase, etc.)
    - `JWT_SECRET`: Minimum 32 random characters
